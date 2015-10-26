@@ -42,8 +42,8 @@ _is_hooked = False
 # >> GAME EVENTS
 # ======================================================================
 
-@Event
-def player_disconnect(game_event):
+@Event('player_disconnect')
+def on_player_disconnect(game_event):
     """Saves player's data upon disconnect."""
 
     userid = game_event.get_int('userid')
@@ -52,8 +52,8 @@ def player_disconnect(game_event):
     del _player_data[userid]
 
 
-@Event
-def player_spawn(game_event):
+@Event('player_spawn')
+def on_player_spawn(game_event):
     """Saves player's data upon spawning."""
 
     player = Player.from_userid(game_event.get_int('userid'))

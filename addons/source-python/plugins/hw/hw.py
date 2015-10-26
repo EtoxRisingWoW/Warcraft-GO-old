@@ -196,8 +196,8 @@ def client_command_menu(playerinfo, command):
 # >> GAME EVENTS
 # ======================================================================
 
-@Event
-def player_spawn(game_event):
+@Event('player_spawn')
+def on_player_spawn(game_event):
     """Saves player's data.
 
     Also executes spawn skills and shows current exp/level progress.
@@ -221,8 +221,8 @@ def player_spawn(game_event):
         hero.execute_skills('player_spawn', player=player)
 
 
-@Event
-def player_death(game_event):
+@Event('player_death')
+def on_player_death(game_event):
     """Executes kill, assist and death skills.
 
     Also gives exp from kill and assist.
@@ -265,8 +265,8 @@ def player_death(game_event):
             defender.hero.items.remove(item)
 
 
-@Event
-def player_hurt(game_event):
+@Event('player_hurt')
+def on_player_hurt(game_event):
     """Executes attack and defend skills."""
 
     # Get the defender
@@ -285,22 +285,22 @@ def player_hurt(game_event):
             'damage_armor': game_event.get_int('dmg_armor'),
             'weapon': game_event.get_string('weapon')
         }
-        
+
         # Execute attacker's and defender's skills
         attacker.hero.execute_skills('player_attack', **eargs)
         defender.hero.execute_skills('player_defend', **eargs)
 
 
-@Event
-def player_jump(game_event):
+@Event('player_jump')
+def on_player_jump(game_event):
     """Executes jump skills."""
 
     player = Player.from_userid(game_event.get_int('userid'))
     player.hero.execute_skills('player_jump', player=player)
 
 
-@Event
-def player_say(game_event):
+@Event('player_say')
+def on_player_say(game_event):
     """Executes ultimate skills and opens the menu."""
 
     # Get the player and the text
@@ -332,8 +332,8 @@ def player_say(game_event):
     player.hero.execute_skills('player_say', player=player, text=text)
 
 
-@Event
-def round_end(game_event):
+@Event('round_end')
+def on_round_end(game_event):
     """Give exp from round win and loss.
 
     Also executes round_end skills.
@@ -362,8 +362,8 @@ def round_end(game_event):
         player.hero.execute_skills('round_end', player=player, winner=winner)
 
 
-@Event
-def round_start(game_event):
+@Event('round_start')
+def on_round_start(game_event):
     """Executes round_start skills."""
 
     for index in PlayerIter():
@@ -372,8 +372,8 @@ def round_start(game_event):
             'round_start', player=player, winner=game_event.get_int('winner'))
 
 
-@Event
-def bomb_planted(game_event):
+@Event('bomb_planted')
+def on_bomb_planted(game_event):
     """Give exp from bomb planting.
 
     Also executes bomb_planted skills.
@@ -385,8 +385,8 @@ def bomb_planted(game_event):
     player.hero.execute_skills('bomb_planted', player=player)
 
 
-@Event
-def bomb_exploded(game_event):
+@Event('bomb_exploded')
+def on_bomb_exploded(game_event):
     """Give exp from bomb explosion.
 
     Also executes bomb_exploded skills.
@@ -398,8 +398,8 @@ def bomb_exploded(game_event):
     player.hero.execute_skills('bomb_exploded', player=player)
 
 
-@Event
-def bomb_defused(game_event):
+@Event('bomb_defused')
+def on_bomb_defused(game_event):
     """Give exp from bomb defusion.
 
     Also executes bomb_defused skills.
@@ -411,8 +411,8 @@ def bomb_defused(game_event):
     player.hero.execute_skills('bomb_defused', player=player)
 
 
-@Event
-def hostage_follows(game_event):
+@Event('hostage_follows')
+def on_hostage_follows(game_event):
     """Give exp from hostage pick up.
 
     Also executes hostage_follows skills.
@@ -424,8 +424,8 @@ def hostage_follows(game_event):
     player.hero.execute_skills('hostage_follows', player=player)
 
 
-@Event
-def hostage_rescued(game_event):
+@Event('hostage_rescued')
+def on_hostage_rescued(game_event):
     """Give exp from hostage rescue.
 
     Also executes hostage_rescued skills.
@@ -437,8 +437,8 @@ def hostage_rescued(game_event):
     player.hero.execute_skills('hostage_rescued', player=player)
 
 
-@Event
-def hero_pre_level_up(game_event):
+@Event('hero_pre_level_up')
+def on_hero_pre_level_up(game_event):
     """Fetches the player and raises the Hero_Level_Up event."""
 
     # Raise hero_level_up event
@@ -458,8 +458,8 @@ def hero_pre_level_up(game_event):
         ).fire()
 
 
-@Event
-def hero_level_up(game_event):
+@Event('hero_level_up')
+def on_hero_level_up(game_event):
     """Sends hero's status to player and opens current hero menu.
 
     Also executes hero_level_up skills.
@@ -487,8 +487,8 @@ def hero_level_up(game_event):
     player.hero.execute_skills('hero_level_up', player=player, hero=hero)
 
 
-@Event
-def player_ultimate(game_event):
+@Event('player_ultimate')
+def on_player_ultimate(game_event):
     """Executes ultimate skills."""
 
     player = Player.from_userid(game_event.get_int('userid'))
