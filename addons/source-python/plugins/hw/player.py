@@ -18,9 +18,10 @@ from hw.configs import player_entity_class
 from players.helpers import index_from_userid
 
 from memory import make_object
-from memory.hooks import HookType
 
 from entities import TakeDamageInfo
+from entities.hooks import EntityPreHook
+from entities.hooks import EntityCondition
 from entities.helpers import index_from_pointer
 
 from events import Event
@@ -28,14 +29,6 @@ from events import Event
 from weapons.entity import WeaponEntity
 
 from engines.server import engine_server
-
-
-# ======================================================================
-# >> GLOBALS
-# ======================================================================
-
-_player_data = {}
-_is_hooked = False
 
 
 # ======================================================================
@@ -49,7 +42,7 @@ def on_player_disconnect(game_event):
     userid = game_event.get_int('userid')
     player = Player.from_userid(userid)
     save_player_data(player)
-    del _player_data[userid]
+    del Player._data[userid]
 
 
 @Event('player_spawn')
@@ -64,7 +57,8 @@ def on_player_spawn(game_event):
 # >> HOOKS
 # ======================================================================
 
-def _weapon_bump(args):
+@EntityPreHook(EntityCondition.is_player, 'bump_weapon')
+def _pre_bump_weapon(args):
     """
     Hooked to a function that is fired any time a weapon is
     requested to be picked up in game.
@@ -82,6 +76,7 @@ def _weapon_bump(args):
         player.hero.execute_skills('weapon_pickup', **eargs)
 
 
+@EntityPreHook(EntityCondition.is_player, 'take_damage')
 def _on_take_damage(args):
     """
     Hooked to a function that is fired any time an
@@ -115,6 +110,8 @@ class Player(player_entity_class):
         heroes: List of owned heroes
     """
 
+    _data = {}
+
     @classmethod
     def from_userid(cls, userid):
         """Returns a Player instance from an userid.
@@ -135,8 +132,8 @@ class Player(player_entity_class):
         super().__init__(index)
 
         # Create player's data dict
-        if self.userid not in _player_data:
-            _player_data[self.userid] = {
+        if self.userid not in Player._data:
+            Player._data[self.userid] = {
                 'gold': 0,
                 'hero': None,
                 'heroes': [],
@@ -157,13 +154,6 @@ class Player(player_entity_class):
             if not self.hero:
                 self.hero = self.heroes[0]
 
-        # Hooks :3
-        global _is_hooked
-        if _is_hooked is False:
-            self.bump_weapon.add_hook(HookType.PRE, _weapon_bump)
-            self.on_take_damage.add_hook(HookType.PRE, _on_take_damage)
-            _is_hooked = True
-
     @property
     def gold(self):
         """Getter for player's Hero-Wars gold.
@@ -172,7 +162,7 @@ class Player(player_entity_class):
             Player's gold
         """
 
-        return _player_data[self.userid]['gold']
+        return Player._data[self.userid]['gold']
 
     @gold.setter
     def gold(self, gold):
@@ -184,7 +174,7 @@ class Player(player_entity_class):
 
         if gold < 0:
             raise ValueError('Attempt to set negative gold for a player.')
-        _player_data[self.userid]['gold'] = gold
+        Player._data[self.userid]['gold'] = gold
 
     @property
     def hero(self):
@@ -194,7 +184,7 @@ class Player(player_entity_class):
             Player's hero
         """
 
-        return _player_data[self.userid]['hero']
+        return Player._data[self.userid]['hero']
 
     @hero.setter
     def hero(self, hero):
@@ -235,7 +225,7 @@ class Player(player_entity_class):
             engine_server.client_command(self.edict, 'kill', True)
 
         # Change to the new hero
-        _player_data[self.userid]['hero'] = hero
+        Player._data[self.userid]['hero'] = hero
 
         # Reset current restrictions
         self.restrictions.clear()
@@ -248,7 +238,7 @@ class Player(player_entity_class):
             A list of player's heroes.
         """
 
-        return _player_data[self.userid]['heroes']
+        return Player._data[self.userid]['heroes']
 
     @property
     def restrictions(self):
@@ -258,7 +248,7 @@ class Player(player_entity_class):
             A set of player's restricted weapons
         """
 
-        return _player_data[self.userid]['restrictions']
+        return Player._data[self.userid]['restrictions']
 
     @restrictions.setter
     def restrictions(self, restrictions):
