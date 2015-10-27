@@ -76,8 +76,8 @@ def _pre_bump_weapon(args):
         player.hero.execute_skills('weapon_pickup', **eargs)
 
 
-@EntityPreHook(EntityCondition.is_player, 'take_damage')
-def _on_take_damage(args):
+@EntityPreHook(EntityCondition.is_player, 'on_take_damage')
+def _pre_on_take_damage(args):
     """
     Hooked to a function that is fired any time an
     entity takes damage.
