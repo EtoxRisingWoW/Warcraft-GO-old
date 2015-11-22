@@ -995,6 +995,29 @@ menus['Admin Player Management'] = PlayerMenu(
 )
 
 # ======================================================================
+# CHANGE EXP MENU
+# ======================================================================
+
+def _exp_select_callback(menu, player_index, choice):
+    multiplier = choice.value
+    __builtins__['exp_multiplier'] = multiplier
+    for player in PlayerIter():
+        message(player.index, '\x02Experience Values \x01changed to \x04{}x\x01, ready Next Round!'.format(multiplier))
+
+menus['Change Exp'] = SimpleMenu(
+    data=[
+        Text('Change EXP Rate'),
+        Text(' '),
+        SimpleOption(1, '1x', 1),
+        SimpleOption(2, '2x', 2),
+        SimpleOption(3, '3x', 3),
+        Text(' '),
+        SimpleOption(9, _TR['Close'], 0, highlight=False)
+    ],
+    select_callback=_exp_select_callback
+)
+
+# ======================================================================
 # >> PLAYERS MENU
 # ======================================================================
 
