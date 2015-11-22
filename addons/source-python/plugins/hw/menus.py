@@ -5,9 +5,9 @@
 # Hero-Wars
 from hw.tools import find_element
 from hw.tools import find_elements
-from hw.tools import split_string
-
+from hw.tools import message
 from hw.tools import shiftattr
+from hw.tools import split_string
 
 from hw.configs import admins
 
@@ -15,8 +15,11 @@ from hw.entities import Hero
 from hw.entities import Item
 
 from hw.player import Player
+from hw.player import PlayerIter
 
 # Source.Python
+from engines.server import engine_server
+
 from menus import PagedMenu as SpPagedMenu
 from menus import SimpleMenu
 from menus import SimpleOption
@@ -26,8 +29,6 @@ from menus import Text
 from menus.base import _translate_text
 
 from translations.strings import LangStrings
-
-from filters.players import PlayerIter
 
 
 # ======================================================================
@@ -58,7 +59,7 @@ class PagedMenu(SpPagedMenu):
     def __init__(
             self, data=None, select_callback=None, build_callback=None,
             description=None, title=None,
-            top_seperator='-' * 30, bottom_seperator='-' * 30, fill=False,
+            top_seperator=' ', bottom_seperator=' ', fill=False,
             # Custom parameters
             constants=None, previous_menu=None, next_menu=None,
             display_page_info=True):
@@ -76,7 +77,7 @@ class PagedMenu(SpPagedMenu):
     def _get_max_item_count(self):
         """Returns the maximum possible item count per page."""
 
-        return 7 - len(self.constants)
+        return 6 - len(self.constants)
 
     def _format_header(self, player_index, page, slots):
         """Prepares the header for the menu."""
@@ -116,7 +117,7 @@ class PagedMenu(SpPagedMenu):
 
         # Loop through numbers from 1 to 7
         choice_index = 0
-        while choice_index < 8:
+        while choice_index < 7:
 
             # Increment the choice index
             choice_index += 1
@@ -149,7 +150,7 @@ class PagedMenu(SpPagedMenu):
 
         # Fill the rest of the menu
         if self.fill:
-            buffer += ' \n' * (7 - len(options) - len(self.constants))
+            buffer += ' \n' * (6 - len(options) - len(self.constants))
 
         return buffer
 
@@ -171,8 +172,8 @@ class PagedMenu(SpPagedMenu):
         )
         if page.index > 0 or self.previous_menu:
             option_previous.highlight = option_previous.selectable = True
-            slots.add(8)
-        buffer += option_previous._render(player_index, 8)
+            slots.add(7)
+        buffer += option_previous._render(player_index, 7)
 
         # Add "Next" option
         option_next = PagedOption(
@@ -183,15 +184,16 @@ class PagedMenu(SpPagedMenu):
         )
         if page.index < self.last_page_index or self.next_menu:
             option_next.highlight = option_next.selectable = True
-            slots.add(9)
-        buffer += option_next._render(player_index, 9)
+            slots.add(8)
+        buffer += option_next._render(player_index, 8)
 
         # Add "Close" option
         option_close = PagedOption(
             _TR['Close'],
             highlight=False
         )
-        buffer += option_close._render(player_index, 0)
+        buffer += option_close._render(player_index, 9)
+        slots.add(9)
 
         # Return the buffer
         return buffer
@@ -200,7 +202,7 @@ class PagedMenu(SpPagedMenu):
         """Handles a menu selection."""
 
         # Do nothing if the menu is being closed
-        if choice_index == 0:
+        if choice_index == 9:
             del self._player_pages[player_index]
             return None
 
@@ -208,7 +210,7 @@ class PagedMenu(SpPagedMenu):
         page = self._player_pages[player_index]
 
         # If "Previous" was clicked
-        if choice_index == 8:
+        if choice_index == 7:
 
             # Display previous page?
             if page.index > 0:
@@ -220,7 +222,7 @@ class PagedMenu(SpPagedMenu):
                 return self.previous_menu
 
         # If "Next" was clicked
-        elif choice_index == 9:
+        elif choice_index == 8:
 
             # Display Next page?
             if page.index < self.last_page_index:
@@ -239,7 +241,7 @@ class HeroMenu(PagedMenu):
     """
     Extends regular xtend's PagedMenu to accept hero argument.
     - hero: Hero class or instance
-    - option7: shortcut property for binding constants[7]
+    - option7: shortcut property for binding constants[6]
     """
 
     def __init__(self, hero, *args, **kwargs):
@@ -248,11 +250,11 @@ class HeroMenu(PagedMenu):
 
     @property
     def option7(self):
-        return self.constants.get(7, None)
+        return self.constants.get(6, None)
 
     @option7.setter
     def option7(self, value):
-        self.constants[7] = value
+        self.constants[6] = value
 
 
 class PlayerMenu(PagedMenu):
@@ -310,9 +312,13 @@ def _current_hero_select_callback(menu, player_index, choice):
     """Current Hero menu's select_callback function."""
 
     player = Player(player_index)
-    if choice.value == 7:
-        for skill in player.hero.skills:
-            skill.level = 0
+    if choice.value == 6:
+        if player.gold >= 50:
+            for skill in player.hero.skills:
+                skill.level = 0
+            player.gold -= 50
+        else:
+            message(player.index, '\x01You need \x04({}) \x01more \x09gold \x01to \x04reset skills\x01.'.format(50-player.gold))
     else:
         skill = choice.value
         if (skill.cost <= player.hero.skill_points and
@@ -320,6 +326,7 @@ def _current_hero_select_callback(menu, player_index, choice):
                 (skill.max_level is None or skill.level < skill.max_level)):
             skill.level += 1
     return menu
+
 
 
 def _current_hero_build_callback(menu, player_index):
@@ -343,7 +350,7 @@ def _current_hero_build_callback(menu, player_index):
     for skill in hero.skills:
 
         # Set the default arguments for the PagedOption
-        info = '{0}{1}'.format(
+        info = '({0}{1})'.format(
             skill.level,
             '/' + str(skill.max_level) if skill.max_level is not None else ''
         )
@@ -390,7 +397,7 @@ def _current_hero_build_callback(menu, player_index):
 menus['Current Hero'] = PagedMenu(
     select_callback=_current_hero_select_callback,
     build_callback=_current_hero_build_callback,
-    constants={7: PagedOption(_TR['Reset Skills'], 7)},
+    constants={6: PagedOption(_TR['Reset Skills'], 6)},
     display_page_info=False
 )
 
@@ -406,7 +413,7 @@ def _owned_heroes_select_callback(menu, player_index, choice):
         choice.value,
         select_callback=_hero_owned_info_select_callback,
         build_callback=_hero_owned_info_build_callback,
-        constants={7: PagedOption(_TR['Change'], 7)},
+        constants={6: PagedOption(_TR['Change'], 6)},
         previous_menu=menu
     )
 
@@ -418,9 +425,9 @@ def _owned_heroes_build_callback(menu, player_index):
 
     player = Player(player_index)
     menu.clear()
-    for hero in player.heroes:
+    for hero in menu.entities:
         option = PagedOption(
-            '{0} {1}{2}'.format(
+            '{0} ({1}{2})'.format(
                 hero.name,
                 hero.level,
                 '/' + str(hero.max_level) if hero.max_level is not None else ''
@@ -450,7 +457,7 @@ def _buy_heroes_select_callback(menu, player_index, choice):
         choice.value,
         select_callback=_hero_buy_info_select_callback,
         build_callback=_hero_buy_info_build_callback,
-        constants={7: PagedOption(_TR['Buy'], 7)},
+        constants={6: PagedOption(_TR['Buy'], 6)},
     )
     next_menu.previous_menu = menu
     return next_menu
@@ -496,6 +503,15 @@ def _buy_items_select_callback(menu, player_index, choice):
     player.hero.items.append(choice.value())
     player.cash -= choice.value.cost
 
+    eargs = {
+        'player': player,
+        'item': item
+    }
+
+    item.execute_method('item_purchase', **eargs)
+
+    return menu.previous_menu
+
 
 def _buy_items_build_callback(menu, player_index):
     """Buy Items menu's build_callback function."""
@@ -504,19 +520,16 @@ def _buy_items_build_callback(menu, player_index):
     menu.clear()
     for item in menu.entities:
         option = PagedOption(
-            '{name} (${cost})\n{description}'.format(
+            '{name} ({cost})'.format(
                 name=item.name,
                 cost=_translate_text(
                     _TR['Cost'].get_string(cost=item.cost),
                     player_index
-                ),
-                description='\n'.join(
-                    split_string(item.description, _description_width)
-                )
+                ) if not item in player.hero.restricted_items else 'RESTRICTED'
             ),
             item
         )
-        if item.cost > player.gold:
+        if item.cost > player.gold or item in player.hero.restricted_items:
             option.selectable = option.highlight = False
         menu.append(option)
 
@@ -535,9 +548,17 @@ def _sell_items_select_callback(menu, player_index, choice):
     """Sell Items menu's select_callback function."""
 
     player = Player(player_index)
+
+    eargs = {
+        'player': player
+    }
+
+    choice.value.execute_method('item_sold', **eargs)
+
     player.hero.items.remove(choice.value)
     player.cash += choice.value.sell_value
 
+    menu.send(player.index)
 
 def _sell_items_build_callback(menu, player_index):
     """Sell Items menu's build_callback function."""
@@ -545,7 +566,7 @@ def _sell_items_build_callback(menu, player_index):
     player = Player(player_index)
     menu.clear()
     for item in player.hero.items:
-        menu.append(PagedOption('{name} (+${sell_value})'.format(
+        menu.append(PagedOption('{name} (${sell_value})'.format(
             name=item.name,
             sell_value=item.sell_value
             ), item
@@ -570,6 +591,29 @@ def _entity_categories_select_callback(menu, player_index, choice):
     next_menu.entities = choice.value
     return next_menu
 
+def _owned_hero_categories_build_callback(menu, player_index):
+
+    player = Player(player_index)
+    menu.entities = []
+
+    for hero_cls in player.heroes:
+        menu.entities.append(hero_cls)
+
+    menu.clear()
+    categories = dict()
+
+    for entity in menu.entities:
+        if entity.category not in categories:
+            categories[entity.category] = [entity]
+        else:
+            categories[entity.category].append(entity)
+
+    for category in categories:
+        menu.append(PagedOption('{category} ({size})'.format(
+            category=category,
+            size=len(categories[category])
+            ), categories[category]
+        ))
 
 def _buy_hero_categories_build_callback(menu, player_index):
     """Buy Hero Categories menu's build_callback function."""
@@ -631,6 +675,13 @@ def _buy_item_categories_build_callback(menu, player_index):
             size=len(categories[category])
             ), categories[category]
         ))
+
+menus['Owned Heroes Categories'] = ForwardMenu(
+    callback_menu=menus['Owned Heroes'],
+    title=_TR['Hero Categories'],
+    select_callback=_entity_categories_select_callback,
+    build_callback=_owned_hero_categories_build_callback
+)   
 
 menus['Hero Buy Categories'] = ForwardMenu(
     callback_menu=menus['Buy Heroes'],
@@ -757,6 +808,14 @@ def _hero_owned_info_build_callback(menu, player_index):
             )
         ))
 
+def _make_heroinfo(race):
+    menus['Heroinfo'] = RaceMenu(
+            race,
+            select_callback=_hero_owned_info_select_callback,
+            build_callback=_hero_owned_info_build_callback
+        )
+    return menus['Heroinfo']
+
 # ======================================================================
 # >> PLAYERINFO MENU
 # ======================================================================
@@ -777,16 +836,17 @@ def _playerinfo_build_callback(menu, player_index):
 
     menu.clear()
     menu.title = menu.player.name
-    menu.description = '{0} ({1})'.format(
+    menu.description = '- {0} (LEVEL {1})'.format(
         menu.player.hero.name,
         menu.player.hero.level
     )
 
     for skill in menu.player.hero.skills:
-        menu.append(Text('{name} {cur}{max}'.format(
+        menu.append(Text('- {name} ({cur}{sep}{max})'.format(
             name=skill.name,
-            cur=skill.level,
-            max='/' + str(skill.max_level) if skill.max_level is not None else ''
+            cur=skill.level if not skill.level == skill.max_level else '',
+            sep='/' if not skill.level == skill.max_level else '',
+            max=str(skill.max_level) if not skill.level == skill.max_level else 'Maxed'
         )))
 
 
@@ -839,6 +899,41 @@ menus['Shift Attr'] = ShiftAttrMenu(
 )
 
 # ======================================================================
+# >> GIVE ITEM MENU
+# ======================================================================
+
+def _give_item_select_callback(menu, player_index, choice):
+
+    player = choice.value[0]
+    item = choice.value[1]()
+
+    player.hero.items.append(item)
+
+    eargs = {
+        'player': player,
+        'item': item
+    }
+
+    item.execute_method('item_purchase', **eargs)
+
+    return menu
+
+def _give_item_build_callback(menu, player_index):
+
+    menu.clear()
+
+    for item in Item.get_subclasses():
+        menu.append(
+            PagedOption(item.name, (menu.obj, item))
+            )
+
+menus['Give Item'] = EntitiesMenu(
+    title=_TR['Give Item'],
+    select_callback=_give_item_select_callback,
+    build_callback=_give_item_build_callback
+)
+
+# ======================================================================
 # >> PLAYER MANAGEMENT MENU
 # ======================================================================
 
@@ -846,11 +941,32 @@ menus['Shift Attr'] = ShiftAttrMenu(
 def _player_management_select_callback(menu, player_index, choice):
     """Player Management menu's select_callback function."""
 
-    next_menu = menus['Shift Attr']
-    next_menu.obj = choice.value[0]
-    next_menu.attr_name = choice.value[1]
-    next_menu.previous_menu = menu
-    return next_menu
+    if choice.value[1] == 'kick':
+        engine_server.server_command('kickid {} {}\n'.format(
+            choice.value[0].userid, 'Kicked by Admin.'))
+    elif choice.value[1] == 'ban':
+        engine_server.server_command('banid 30 {} kick\n'.format(
+            choice.value[0].userid, 'Banned by Admin for 30 minutes.'))
+    elif choice.value[1] == 'perm':
+        engine_server.server_command('banid 0 {} kick\n'.format(
+            choice.value[0].userid, 'Banned by Admin permanently.'))
+        engine_server.server_command('writeid\n')
+    elif choice.value[1] == 'item':
+        next_menu = menus['Give Item']
+        next_menu.obj = choice.value[0]
+        next_menu.previous_menu = menu
+        return next_menu
+    elif choice.value[1] == 'change':
+        next_menu = menus['Change Exp']
+        next_menu.multiplier = choice.value[0]
+        next_menu.previous_menu = menu
+        return next_menu
+    else:
+        next_menu = menus['Shift Attr']
+        next_menu.obj = choice.value[0]
+        next_menu.attr_name = choice.value[1]
+        next_menu.previous_menu = menu
+        return next_menu
 
 
 def _player_management_build_callback(menu, player_index):
@@ -858,7 +974,7 @@ def _player_management_build_callback(menu, player_index):
 
     menu.clear()
     menu.title = menu.player.name
-    menu.description = '{0} ({1})'.format(
+    menu.description = '{0} (LEVEL: {1})'.format(
         menu.player.hero.name,
         menu.player.hero.level
     )
@@ -866,7 +982,11 @@ def _player_management_build_callback(menu, player_index):
         PagedOption(_TR['Give Gold'], (menu.player, 'gold')),
         PagedOption(_TR['Give Cash'], (menu.player, 'cash')),
         PagedOption(_TR['Give Exp'], (menu.player.hero, 'exp')),
-        PagedOption(_TR['Give Level'], (menu.player.hero, 'level'))
+        PagedOption(_TR['Give Level'], (menu.player.hero, 'level')),
+        PagedOption(_TR['Give Item'], (menu.player, 'item')),
+        PagedOption(_TR['Kick Player'], (menu.player, 'kick')),
+        PagedOption(_TR['Ban Player'], (menu.player, 'ban')),
+        PagedOption(_TR['Perm Player'], (menu.player, 'perm'))
     ])
 
 menus['Admin Player Management'] = PlayerMenu(
@@ -892,8 +1012,7 @@ def _players_build_callback(menu, player_index):
     """Players menu's build_callback function."""
 
     menu.clear()
-    for index in PlayerIter():
-        player = Player(index)
+    for player in PlayerIter():
         menu.append(PagedOption(player.name, player))
 
 
@@ -933,7 +1052,11 @@ def _admin_build_callback(menu, player_index):
     if player.steamid in admins:
         menu.extend([
             Text('Admin'),
-            SimpleOption(1, 'Player Management', menus['Admin Players Menu'])
+            Text(' '),
+            SimpleOption(1, 'Player Management', menus['Admin Players Menu']),
+            SimpleOption(2, 'Experience Rate', menus['Change Exp']),
+            Text(' '),
+            SimpleOption(9, _TR['Close'], 0, highlight=False)
         ])
     else:
         menu.append(Text('Not an admin!'))
@@ -966,7 +1089,7 @@ menus['Main'] = SimpleMenu(
         Text('Hero-Wars'),
         Text(_TR['Gold']),
         SimpleOption(1, _TR['Current Hero'], menus['Current Hero']),
-        SimpleOption(2, _TR['Owned Heroes'], menus['Owned Heroes']),
+        SimpleOption(2, _TR['Owned Heroes'], menus['Owned Heroes Categories']),
         SimpleOption(3, _TR['Buy Heroes'], menus['Hero Buy Categories']),
         SimpleOption(4, _TR['Sell Items'], menus['Sell Items']),
         SimpleOption(5, _TR['Buy Items'], menus['Item Buy Categories']),

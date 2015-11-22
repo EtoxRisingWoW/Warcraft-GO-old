@@ -72,6 +72,9 @@ gold_values = {
 # Show messages for gold gain
 show_gold_messages = True
 
+# Shown message prefix ">> {prefix}: {message}"
+message_prefix = 'Hero Wars'
+
 
 # Starting heroes for when an user joins the server for the first time
 # > Use class names for identifying the Hero classes
