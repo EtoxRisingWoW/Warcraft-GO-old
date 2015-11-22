@@ -19,10 +19,6 @@ admins = (
 )
 
 
-# Prefix needed for chat commands
-chat_command_prefix = '!'
-
-
 # (Relative) path to database file used by Hero-Wars
 database_path = os.path.dirname(__file__) + '/players.db'
 

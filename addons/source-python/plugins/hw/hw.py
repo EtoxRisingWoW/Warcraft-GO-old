@@ -7,7 +7,7 @@ from hw.player import Player
 from hw.player import PlayerIter
 
 import hw.database
-
+from hw.effects import level_up
 from hw.entities import Hero
 
 from hw.tools import get_messages
@@ -543,3 +543,5 @@ def hero_level_up(player):
 
     # Execute player's skills
     player.hero.execute_skills('hero_level_up', player=player, hero=hero)
+
+    level_up(player)
