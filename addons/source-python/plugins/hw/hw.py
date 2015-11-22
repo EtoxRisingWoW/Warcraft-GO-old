@@ -35,6 +35,8 @@ from translations.strings import LangStrings
 
 from commands.client import ClientCommand
 
+from messages import HintText, SayText2
+
 
 # ======================================================================
 # >> GLOBALS
@@ -57,9 +59,9 @@ info.convar = PublicConVar(
 )
 
 # Translation messages
-exp_messages = get_messages(LangStrings('hw/exp'))
-gold_messages = get_messages(LangStrings('hw/gold'))
-other_messages = get_messages(LangStrings('hw/other'))
+exp_messages = get_messages(LangStrings('hw/exp'), HintText)
+gold_messages = get_messages(LangStrings('hw/gold'), SayText2)
+other_messages = get_messages(LangStrings('hw/other'), SayText2)
 
 
 # ======================================================================

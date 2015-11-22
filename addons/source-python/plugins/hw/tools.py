@@ -97,7 +97,7 @@ def get_subclasses(cls):
     return subclasses
 
 
-def get_messages(lang_strings):
+def get_messages(lang_strings, cls):
     """Gets a dict of SayText2 messages from a LangStrings object.
 
     Args:
@@ -107,7 +107,7 @@ def get_messages(lang_strings):
         A dict of SayText2 messages
     """
 
-    return {key: SayText2(message=lang_strings[key]) for key in lang_strings}
+    return {key: cls(message=lang_strings[key]) for key in lang_strings}
 
 
 def shiftattr(obj, attr_name, shift):
