@@ -8,7 +8,7 @@ from random import randint
 from functools import wraps, WRAPPER_ASSIGNMENTS
 
 # Source.Python
-from listeners.tick.repeat import TickRepeat
+from listeners.tick import TickRepeat
 
 from messages import SayText2
 
