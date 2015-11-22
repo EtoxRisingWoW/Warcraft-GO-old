@@ -10,10 +10,6 @@ import hw.database
 
 from hw.entities import Hero
 
-from hw.events import Hero_Level_Up
-from hw.events import Player_Ultimate
-from hw.events import load as load_events
-
 from hw.tools import get_messages
 from hw.tools import find_element
 
@@ -93,9 +89,6 @@ def load():
     # Setup database
     hw.database.setup()
 
-    # Load Hero-Wars events
-    load_events()
-
     # Restart the game
     engine_server.server_command('mp_restartgame 1\n')
 
@@ -144,8 +137,11 @@ def give_exp(player, exp_key):
 
     exp = cfg.exp_values.get(exp_key, 0)
     if exp > 0:
+        level = player.hero.level
         player.hero.exp += exp
         exp_messages[exp_key].send(player.index, exp=exp)
+        if player.hero.level > level:
+            hero_level_up(player)
 
 
 def give_team_exp(player, exp_key):
@@ -167,25 +163,17 @@ def give_team_exp(player, exp_key):
 # ======================================================================
 
 @ClientCommand('hw_ultimate')
-def client_command_ultimate(playerinfo, command):
+def client_command_ultimate(command, index):
     """Raises ultimate event with player's information."""
 
-    Player_Ultimate(
-        index=index_from_playerinfo(playerinfo),
-        userid=userid_from_playerinfo(playerinfo)
-    ).fire()
+    player = Player(index)
+    player.hero.execute_skills('player_ultimate', player=player)
 
 
 @ClientCommand('hw_menu')
-def client_command_menu(playerinfo, command):
-    """Opens a menu."""
-
-    index = index_from_playerinfo(playerinfo)
-    menu = command.get_arg_string()
-    if menu in menus:
-        menus[menu].send(index)
-    else:
-        menus['Main'].send(index)
+def client_command_menu(command, index):
+    """Opens main menu."""
+    menus['Main'].send(index)
 
 
 # ======================================================================
@@ -429,36 +417,11 @@ def on_hostage_rescued(game_event):
     player.hero.execute_skills('hostage_rescued', player=player)
 
 
-@Event('hero_pre_level_up')
-def on_hero_pre_level_up(game_event):
-    """Fetches the player and raises the Hero_Level_Up event."""
-
-    # Raise hero_level_up event
-    hero_id = int(game_event.get_string('id'))
-    owner = None
-    for player in PlayerIter():
-        if id(player.hero) == hero_id:
-            owner = player
-            break
-    if owner:
-        Hero_Level_Up(
-            cid=game_event.get_string('cid'),
-            id=str(hero_id),
-            player_index=player.index,
-            player_userid=player.userid
-        ).fire()
-
-
-@Event('hero_level_up')
-def on_hero_level_up(game_event):
+def hero_level_up(player):
     """Sends hero's status to player and opens current hero menu.
 
     Also executes hero_level_up skills.
     """
-
-    # Get the player and his hero
-    index = game_event.get_int('player_index')
-    player = Player(index)
     hero = player.hero
 
     # Send hero's status via chat
@@ -476,11 +439,3 @@ def on_hero_level_up(game_event):
 
     # Execute player's skills
     player.hero.execute_skills('hero_level_up', player=player, hero=hero)
-
-
-@Event('player_ultimate')
-def on_player_ultimate(game_event):
-    """Executes ultimate skills."""
-
-    player = Player.from_userid(game_event.get_int('userid'))
-    player.hero.execute_skills('player_ultimate', player=player)

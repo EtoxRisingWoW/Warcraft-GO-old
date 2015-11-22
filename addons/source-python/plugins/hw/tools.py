@@ -2,6 +2,9 @@
 # >> IMPORTS
 # ======================================================================
 
+# Hero-Wars
+from hw.configs import message_prefix
+
 # Python
 from random import randint
 
@@ -34,6 +37,19 @@ class classproperty(object):
 # ======================================================================
 # >> FUNCTIONS
 # ======================================================================
+
+def message(player_index, message):
+        """Sends a message from an entity to a player using SayText2.
+
+        Args:
+            player_index: Index of the player who to send the message to
+            message: Message to send
+        """
+
+        SayText2(message='>> \x03{prefix}\x01: {msg}'.format(
+            prefix=message_prefix,
+            msg=message
+        )).send(player_index)
 
 def find_element(iterable, attr_name, attr_value):
     """Finds an element from an iterable by comparing an attribute.

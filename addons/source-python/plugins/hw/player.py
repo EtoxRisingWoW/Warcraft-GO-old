@@ -32,8 +32,6 @@ from filters.iterator import _IterObject
 
 from weapons.entity import Weapon
 
-from engines.server import engine_server
-
 
 # ======================================================================
 # >> GAME EVENTS
@@ -79,6 +77,16 @@ def _pre_bump_weapon(args):
     else:
         player.hero.execute_skills('weapon_pickup', **eargs)
 
+@EntityPreHook(EntityCondition.is_player, 'buy_internal')
+def _on_buy_internal(args):
+    """
+    Hooked to a function that is fired any time a weapon
+    is purchased. (Stops bots from buying.)
+    """
+    player_index = index_from_pointer(args[0])
+    player = Player(player_index)
+    if player.playerinfo.is_fake_client() and len(player.restrictions) > 0:
+        return 0
 
 @EntityPreHook(EntityCondition.is_player, 'on_take_damage')
 def _pre_on_take_damage(args):
@@ -98,7 +106,11 @@ def _pre_on_take_damage(args):
     }
     if not player_index == info.attacker:
         defender.hero.execute_skills('player_pre_defend', **eargs)
-        attacker.hero.execute_skills('player_pre_attack', **eargs)
+        '''
+        Added exception to check whether world caused damage.
+        '''
+        if attacker:
+            attacker.hero.execute_skills('player_pre_attack', **eargs)
 
 
 # ======================================================================
@@ -239,7 +251,7 @@ class Player(player_entity_class):
                     self.hero.items.remove(item)
 
             # Slay the player
-            engine_server.client_command(self.edict, 'kill', True)
+            self.client_command(self.edict, 'kill', True)
 
         # Change to the new hero
         Player._data[self.userid]['hero'] = hero
