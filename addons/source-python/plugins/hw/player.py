@@ -16,17 +16,21 @@ from hw.configs import player_entity_class
 
 # Source.Python
 from players.helpers import index_from_userid
+from players import PlayerGenerator
 
 from memory import make_object
 
 from entities import TakeDamageInfo
 from entities.hooks import EntityPreHook
 from entities.hooks import EntityCondition
+from entities.helpers import index_from_edict
 from entities.helpers import index_from_pointer
 
 from events import Event
 
-from weapons.entity import WeaponEntity
+from filters.iterator import _IterObject
+
+from weapons.entity import Weapon
 
 from engines.server import engine_server
 
@@ -66,7 +70,7 @@ def _pre_bump_weapon(args):
 
     player_index = index_from_pointer(args[0])
     weapon_index = index_from_pointer(args[1])
-    weapon = WeaponEntity(weapon_index)
+    weapon = Weapon(weapon_index)
     player = Player(player_index)
     eargs = {'weapon': weapon, 'player': player}
     if weapon.classname in player.restrictions:
@@ -100,6 +104,19 @@ def _pre_on_take_damage(args):
 # ======================================================================
 # >> CLASSES
 # ======================================================================
+
+class PlayerIter(_IterObject):
+    """Player iterate class."""
+
+    @staticmethod
+    def iterator():
+        """Iterate over all Player objects."""
+        # Loop through all players on the server
+        for edict in PlayerGenerator():
+
+            # Yield the Player instance for the current edict
+            yield Player(index_from_edict(edict))
+
 
 class Player(player_entity_class):
     """Player class for Hero-Wars related activity and data.

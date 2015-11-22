@@ -4,6 +4,7 @@
 
 # Hero-Wars
 from hw.player import Player
+from hw.player import PlayerIter
 
 import hw.database
 
@@ -38,8 +39,6 @@ from plugins.info import PluginInfo
 from translations.strings import LangStrings
 
 from commands.client import ClientCommand
-
-from filters.players import PlayerIter
 
 
 # ======================================================================
@@ -108,8 +107,7 @@ def unload():
     """Save all unsaved data into database."""
 
     # Save each player's data into the database
-    for index in PlayerIter():
-        player = Player(index)
+    for player in PlayerIter():
         hw.database.save_player_data(player)
 
     # Commit and close
@@ -159,10 +157,8 @@ def give_team_exp(player, exp_key):
     """
 
     # Give all his teammates exp
-    team = player.team == 2 and 't' or 'ct'
-    for index in PlayerIter(is_filters=team):
-        if index != player.index:
-            teammate = Player(index)
+    for teammate in PlayerIter():
+        if teammate.userid != player.userid:
             give_exp(teammate, exp_key)
 
 
@@ -343,10 +339,7 @@ def on_round_end(game_event):
     winner = game_event.get_int('winner')
 
     # Loop through all the players
-    for index in PlayerIter():
-
-        # Get player
-        player = Player(index)
+    for player in PlayerIter():
 
         # Give player win exp and gold
         if player.team == winner:
@@ -366,8 +359,7 @@ def on_round_end(game_event):
 def on_round_start(game_event):
     """Executes round_start skills."""
 
-    for index in PlayerIter():
-        player = Player(index)
+    for player in PlayerIter():
         player.hero.execute_skills(
             'round_start', player=player, winner=game_event.get_int('winner'))
 
@@ -444,8 +436,7 @@ def on_hero_pre_level_up(game_event):
     # Raise hero_level_up event
     hero_id = int(game_event.get_string('id'))
     owner = None
-    for index in PlayerIter():
-        player = Player(index)
+    for player in PlayerIter():
         if id(player.hero) == hero_id:
             owner = player
             break

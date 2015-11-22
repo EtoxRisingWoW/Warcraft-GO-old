@@ -98,4 +98,4 @@ def exp_algorithm(level):
 
 
 # PlayerEntity class used as a super class of Hero-Wars's Player class
-player_entity_class = players.entity.PlayerEntity
+player_entity_class = players.entity.Player
