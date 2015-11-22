@@ -15,8 +15,7 @@ import players.entity
 
 # List of admin's steamid's
 admins = (
-    'STEAM_0:1:17441574',  # Kamiqawa
-    'STEAM_0:0:20178479'  # Mahi
+    'STEAM_1:0:120220385', # Predz
 )
 
 
@@ -25,7 +24,7 @@ chat_command_prefix = '!'
 
 
 # (Relative) path to database file used by Hero-Wars
-database_path = os.path.dirname(__file__) + '/hw.db'
+database_path = os.path.dirname(__file__) + '/players.db'
 
 
 # Amounts of experience points gained from objectives
@@ -55,6 +54,13 @@ exp_values = {
     'Hostage Rescue Team': 10
 }
 
+# Multiplier for experience gained upon events
+__builtins__['exp_multiplier'] = 1
+
+# Function for retrieving the experience event values
+def _retrieve_exp_values(multiplier):
+    return {k: v*multiplier for k, v in exp_values.items()}
+
 
 # Amounts of gold gained from objectives
 gold_values = {
@@ -79,16 +85,16 @@ message_prefix = 'Hero Wars'
 # Starting heroes for when an user joins the server for the first time
 # > Use class names for identifying the Hero classes
 starting_heroes = (
-    'TestHero1',
+    'Scourge',
 )
 
 
 # Hero category used when the category is not defined
-default_hero_category = 'Others'
+default_hero_category = 'OTHERS'
 
 
 # Item category used when the category is not defined
-default_item_category = 'Others'
+default_item_category = 'OTHERS'
 
 
 # Items' default sell value's multiplier

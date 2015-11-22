@@ -24,7 +24,6 @@ import hw.configs as cfg
 from events import Event
 
 from players.helpers import userid_from_playerinfo
-from players.helpers import index_from_playerinfo
 
 from engines.server import engine_server
 
@@ -162,18 +161,144 @@ def give_team_exp(player, exp_key):
 # >> CLIENT COMMANDS
 # ======================================================================
 
-@ClientCommand('hw_ultimate')
-def client_command_ultimate(command, index):
-    """Raises ultimate event with player's information."""
+@ClientCommand(['buymenu'])
+def client_command_buymenu(command, index):
+    menus['Item Buy Categories'].send(index)
+    return CommandReturn.BLOCK
 
+@ClientCommand(['sellmenu', 'sell'])
+def client_command_sellmenu(command, index):
+    menus['Sell Items'].send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('ultimate')
+def client_command_ultimate(command, index):
     player = Player(index)
     player.hero.execute_skills('player_ultimate', player=player)
+    return CommandReturn.BLOCK
 
+@ClientCommand('showxp')
+def client_command_showxp(command, index):
+    player = Player(index)
 
-@ClientCommand('hw_menu')
+    other_messages['Hero Status'].send(
+        player.index,
+        name=player.hero.name,
+        level=player.hero.level,
+        current=player.hero.exp,
+        required=player.hero.required_exp
+    )
+    return CommandReturn.BLOCK
+
+@ClientCommand(['wcsmenu', 'wcs'])
 def client_command_menu(command, index):
-    """Opens main menu."""
     menus['Main'].send(index)
+    return CommandReturn.BLOCK
+
+# wcs_ability 1, wcs_ability 2, etc
+@ClientCommand('ability')
+def client_command_ability(command, index):
+    ability_index = int(command.get_arg_string())
+    player = Player(index)
+    if len(player.hero.abilities) >= ability_index:
+        ability = player.hero.abilities[ability_index-1]
+
+        eargs = {
+            'player': player
+        }
+
+        ability.execute_method('player_use', **eargs)
+    return CommandReturn.BLOCK
+
+@ClientCommand('wcsadmin')
+def client_command_admin(command, index):
+    player = Player(index)
+    if player.steamid in cfg.admins:
+        menus['Admin'].send(index)
+    else:
+        other_messages['Not Admin'].send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('raceinfo')
+def client_command_ability(command, index):
+    player = Player(index)
+    menu = _make_heroinfo(player.hero)
+    menu.send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('changerace')
+def client_command_changerace(command, index):
+    menus['Owned Heroes'].send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('buyrace')
+def client_command_buyrace(command, index):
+    menus['Hero Buy Categories'].send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('playerinfo')
+def client_command_playerinfo(command, index):
+    menus['Playerinfo Choose'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['wcs', '!wcs'])
+def say_command_menu(command, index, team):
+    menus['Main'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['wcsadmin', '!wcsadmin'])
+def say_command_admin(command, index, team):
+    player = Player(index)
+    if player.steamid in cfg.admins:
+        menus['Admin'].send(index)
+    else:
+        other_messages['Not Admin'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['raceinfo', '!raceinfo'])
+def say_command_raceinfo(command, index, team):
+    player = Player(index)
+    menu = _make_heroinfo(player.hero)
+    menu.send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['changerace', '!changerace'])
+def say_command_changerace(command, index, team):
+    menus['Owned Heroes'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['buyraces', '!buyraces'])
+def say_command_buyrace(command, index, team):
+    menus['Hero Buy Categories'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['playerinfo', '!playerinfo'])
+def say_command_playerinfo(command, index, team):
+    menus['Playerinfo Choose'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['showxp', '!showxp'])
+def say_command_showxp(command, index, team):
+    player = Player(index)
+
+    other_messages['Hero Status'].send(
+        player.index,
+        name=player.hero.name,
+        level=player.hero.level,
+        current=player.hero.exp,
+        required=player.hero.required_exp
+    )
+    return CommandReturn.BLOCK
+
+@SayCommand(['buymenu', 'buy', '!buymenu', '!buy'])
+def say_command_buymenu(command, index, team):
+    menus['Item Buy Categories'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['sellmenu', 'sell', '!sellmenu', '!sell'])
+def say_command_sellmenu(command, index, team):
+    menus['Sell Items'].send(index)
+    return CommandReturn.BLOCK
 
 
 # ======================================================================
