@@ -416,27 +416,6 @@ def on_player_say(game_event):
     player = Player.from_userid(game_event.get_int('userid'))
     text = game_event.get_string('text')
 
-    # If text doesn't begin with the prefix, it's useless for us
-    if text[:len(cfg.chat_command_prefix)] != cfg.chat_command_prefix:
-        return
-
-    # Get the ACTUAL text without the prefix
-    text2 = text[len(cfg.chat_command_prefix):]
-
-    # If the text was '!ultimate', execute ultimate skills
-    if text2 == 'ultimate':
-        Player_Ultimate(
-            index=player.index,
-            userid=player.userid
-        ).fire()
-
-    # If the text was '!hw' or '!hw', open Main menu
-    elif text2 in ('hw', 'hw'):
-        menus['Main'].send(player.index)
-
-    elif text2 == 'admin' and player.steamid in cfg.admins:
-        menus['Admin'].send(player.index)
-
     # Finally, execute hero's player_say skills
     player.hero.execute_skills('player_say', player=player, text=text)
 

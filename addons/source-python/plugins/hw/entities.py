@@ -11,8 +11,6 @@ from hw.configs import default_item_category
 from hw.configs import item_sell_value_multiplier
 from hw.configs import exp_algorithm
 
-from hw.events import Hero_Pre_Level_Up
-
 # Source.Python
 from messages import SayText2
 
@@ -60,6 +58,7 @@ class Entity(object):
     cost = int()
     max_level = None
     allowed_players = list()
+    restricted_items = ()
 
     @classproperty
     def cid(cls):
@@ -129,7 +128,7 @@ class Entity(object):
             Entity's message prefix
         """
 
-        return '[{}] '.format(self.name)
+        return '>> \x04{}\x01: '.format(self.name)
 
     def message(self, player_index, message):
         """Sends a message from an entity to a player using SayText2.
@@ -182,8 +181,11 @@ class Hero(Entity):
         self._exp = exp
         self.skills = [skill() for skill in self.skill_set]
         self.passives = [passive() for passive in self.passive_set]
+        self.abilities = [ability() for ability in self.ability_set]
         self.items = []
-        self.effects = []
+
+        # Sorts abilities in order for later retrieval
+        sorted(self.abilities, key=lambda x: x.index)
 
     @property
     def required_exp(self):
@@ -211,7 +213,6 @@ class Hero(Entity):
 
         self._exp = 0
         Entity.level.fset(self, level)  # Call to Entity's level setter
-        Hero_Pre_Level_Up(cid=self.cid, id=str(id(self))).fire()
 
     @property
     def exp(self):
@@ -255,10 +256,6 @@ class Hero(Entity):
             if self.max_level is not None and self.level >= self.max_level:
                 self.level = self.max_level
 
-            # Fire the level up event
-            if self.level > old_level:
-                Hero_Pre_Level_Up(cid=self.cid, id=str(id(self))).fire()
-
     @property
     def skill_points(self):
         """Gets the amount of hero's unused skill points.
@@ -288,8 +285,6 @@ class Hero(Entity):
                 skill.execute_method(method_name, **eargs)
         for item in self.items:
             item.execute_method(method_name, **eargs)
-        for effect in self.effects:
-            effect.execute_method(method_name, **eargs)
 
     @classmethod
     def skill(cls, skill_class):
@@ -358,19 +353,6 @@ class Skill(Entity):
             method(self, **eargs)
 
 
-class Effect(Skill):
-    """Effects are temporary skills that are applied by other skills.
-
-    Effects usually last for a limited time only, and they can be
-    positive (usually applied on allies or self) or negative (usually
-    applied on enemies).
-    """
-
-    name = 'Unnamed Effect'
-    description = 'This is an effect.'
-    cost = 0
-
-
 class Item(Skill):
     """Items are temporary skills that can be bought on heroes.
 
@@ -383,10 +365,8 @@ class Item(Skill):
     """
 
     # Defaults
-    name = 'Unnamed Item'
-    description = 'This is an item.'
     cost = 10
-    permanent = False  # Does the item stay after death
+    permanent = False # Does the item stay after death
     limit = 0
     category = default_item_category
 

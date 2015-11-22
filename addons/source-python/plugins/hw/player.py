@@ -102,7 +102,10 @@ def _pre_on_take_damage(args):
     eargs = {
         'attacker': attacker,
         'defender': defender,
-        'info': info
+        'info': info,
+        'weapon': Weapon(
+            index_from_inthandle(attacker.active_weapon)
+            ).class_name if attacker and attacker.active_weapon != -1 else ''
     }
     if not player_index == info.attacker:
         defender.hero.execute_skills('player_pre_defend', **eargs)
