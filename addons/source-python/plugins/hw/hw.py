@@ -58,6 +58,9 @@ info.convar = PublicConVar(
     "{0} Version".format(info.name)
 )
 
+# Experience Values
+exp_values = cfg._retrieve_exp_values(cfg.exp_multiplier)
+
 # Translation messages
 exp_messages = get_messages(LangStrings('hw/exp'), HintText)
 gold_messages = get_messages(LangStrings('hw/gold'), SayText2)
@@ -452,6 +455,9 @@ def on_round_end(game_event):
 @Event('round_start')
 def on_round_start(game_event):
     """Executes round_start skills."""
+
+    global exp_values
+    exp_values = cfg._retrieve_exp_values(cfg.exp_multiplier)
 
     for player in PlayerIter():
         player.hero.execute_skills(

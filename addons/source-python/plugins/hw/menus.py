@@ -9,6 +9,7 @@ from hw.tools import message
 from hw.tools import shiftattr
 from hw.tools import split_string
 
+import hw.configs as cfg
 from hw.configs import admins
 
 from hw.entities import Hero
@@ -1000,7 +1001,7 @@ menus['Admin Player Management'] = PlayerMenu(
 
 def _exp_select_callback(menu, player_index, choice):
     multiplier = choice.value
-    __builtins__['exp_multiplier'] = multiplier
+    cfg.exp_multiplier = multiplier
     for player in PlayerIter():
         message(player.index, '\x02Experience Values \x01changed to \x04{}x\x01, ready Next Round!'.format(multiplier))
 

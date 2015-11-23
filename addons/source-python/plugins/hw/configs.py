@@ -51,7 +51,7 @@ exp_values = {
 }
 
 # Multiplier for experience gained upon events
-__builtins__['exp_multiplier'] = 1
+exp_multiplier = 1
 
 # Function for retrieving the experience event values
 def _retrieve_exp_values(multiplier):

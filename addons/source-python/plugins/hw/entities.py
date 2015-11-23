@@ -14,6 +14,9 @@ from hw.configs import exp_algorithm
 # Source.Python
 from messages import SayText2
 
+# Python 3.4
+import operator
+
 
 # ======================================================================
 # >> ALL DECLARATION
@@ -181,11 +184,9 @@ class Hero(Entity):
         self._exp = exp
         self.skills = [skill() for skill in self.skill_set]
         self.passives = [passive() for passive in self.passive_set]
-        self.abilities = [ability() for ability in self.ability_set]
+        self.abilities = [(ability() for ability in self.ability_set)]
+        self.abilities.sort(key=operator.attrgetter('index'))
         self.items = []
-
-        # Sorts abilities in order for later retrieval
-        sorted(self.abilities, key=lambda x: x.index)
 
     @property
     def required_exp(self):
