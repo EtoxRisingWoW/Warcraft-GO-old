@@ -1,3 +1,13 @@
-*.db
+// Python
 __pycache__
 *.pyc
+
+// Database
+*.db
+*.sql
+*.sqlite
+*.sqlite3
+
+// Visual Studio
+*.vs
+*.pyproj
