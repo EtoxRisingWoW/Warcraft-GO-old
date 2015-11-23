@@ -3,7 +3,6 @@
 # ======================================================================
 
 from hw.effects.precache import models
-from hw.effects.bomb import *
 from hw.effects.levelup import level_up
 
 # ======================================================================
