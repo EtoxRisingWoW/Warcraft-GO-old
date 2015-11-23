@@ -2,42 +2,29 @@
 # >> IMPORTS
 # ======================================================================
 
-# Warcraft: GO
-from wcgo.adverts import send_advert
-
-from wcgo.player import Player
-from wcgo.player import PlayerIter
-
-import wcgo.database
-from wcgo.effects import level_up
-from wcgo.entities import Hero
-
-from wcgo.tools import get_messages
-from wcgo.tools import find_element
-
-from wcgo.menus import menus
-
-from wcgo.heroes import *
-from wcgo.items import *
-
-import wcgo.configs as cfg
-
 # Source.Python
-from events import Event
-
-from players.helpers import userid_from_playerinfo
-
-from engines.server import engine_server
-
+from commands.client import ClientCommand
 from cvars.public import PublicConVar
-
+from engines.server import engine_server
+from events import Event
+from players.helpers import userid_from_playerinfo
 from plugins.info import PluginInfo
-
+from messages import HintText, SayText2
 from translations.strings import LangStrings
 
-from commands.client import ClientCommand
-
-from messages import HintText, SayText2
+# Warcraft: GO
+import wcgo.configs as cfg
+from wcgo.adverts import send_advert
+from wcgo.database import *
+from wcgo.effects import level_up
+from wcgo.entities import Hero
+from wcgo.heroes import *
+from wcgo.items import *
+from wcgo.menus import menus
+from wcgo.player import Player
+from wcgo.player import PlayerIter
+from wcgo.tools import get_messages
+from wcgo.tools import find_element
 
 
 # ======================================================================
@@ -93,7 +80,7 @@ def load():
             raise ValueError('Invalid starting hero cid: {0}'.format(cid))
 
     # Setup database
-    wcgo.database.setup()
+    setup()
 
     # Restart the game
     engine_server.server_command('mp_restartgame 1\n')
@@ -107,11 +94,11 @@ def unload():
 
     # Save each player's data into the database
     for player in PlayerIter():
-        wcgo.database.save_player_data(player)
+        save_player_data(player)
 
     # Commit and close
-    wcgo.database.connection.commit()
-    wcgo.database.connection.close()
+    connection.commit()
+    connection.close()
 
     # Send a message to everyone
     other_messages['Plugin Unloaded'].send()

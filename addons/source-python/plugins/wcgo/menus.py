@@ -2,34 +2,28 @@
 # >> IMPORTS
 # ======================================================================
 
-# Warcraft: GO
-from wcgo.tools import find_element
-from wcgo.tools import find_elements
-from wcgo.tools import message
-from wcgo.tools import shiftattr
-from wcgo.tools import split_string
-
-import wcgo.configs as cfg
-from wcgo.configs import admins
-
-from wcgo.entities import Hero
-from wcgo.entities import Item
-
-from wcgo.player import Player
-from wcgo.player import PlayerIter
-
 # Source.Python
 from engines.server import engine_server
-
 from menus import PagedMenu as SpPagedMenu
 from menus import SimpleMenu
 from menus import SimpleOption
 from menus import PagedOption
 from menus import Text
-
 from menus.base import _translate_text
-
 from translations.strings import LangStrings
+
+# Warcraft: GO
+import wcgo.configs as cfg
+from wcgo.configs import admins
+from wcgo.entities import Hero
+from wcgo.entities import Item
+from wcgo.player import Player
+from wcgo.player import PlayerIter
+from wcgo.tools import find_element
+from wcgo.tools import find_elements
+from wcgo.tools import message
+from wcgo.tools import shiftattr
+from wcgo.tools import split_string
 
 
 # ======================================================================

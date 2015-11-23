@@ -2,19 +2,16 @@
 # >> IMPORTS
 # ======================================================================
 
-# Warcraft: GO
-from wcgo.configs import message_prefix
-
 # Python
-from random import randint
-
 from functools import wraps, WRAPPER_ASSIGNMENTS
+from random import randint
 
 # Source.Python
 from listeners.tick import TickRepeat
-
 from messages import SayText2
 
+# Warcraft: GO
+from wcgo.configs import message_prefix
 
 # ======================================================================
 # >> CLASSES

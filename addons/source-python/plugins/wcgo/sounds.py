@@ -2,11 +2,12 @@
 # >> IMPORTS
 # ======================================================================
 
-# Warcraft: GO
-from wcgo.downloads import downloadables
 
 # Source.Python
 from engines.sound import Sound
+
+# Warcraft: GO
+from wcgo.downloads import downloadables
 
 
 # ======================================================================

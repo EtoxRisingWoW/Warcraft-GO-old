@@ -2,34 +2,27 @@
 # >> IMPORTS
 # ======================================================================
 
-# Warcraft: GO from wcgo.database import save_player_data
-from wcgo.database import load_player_data
-from wcgo.database import save_hero_data
-
-from wcgo.entities import Hero
-
-from wcgo.tools import find_element
-
-from wcgo.configs import starting_heroes
-from wcgo.configs import player_entity_class
-
 # Source.Python
-from players.helpers import index_from_userid
-from players import PlayerGenerator
-
-from memory import make_object
-
 from entities import TakeDamageInfo
 from entities.hooks import EntityPreHook
 from entities.hooks import EntityCondition
 from entities.helpers import index_from_edict
 from entities.helpers import index_from_pointer
-
 from events import Event
-
 from filters.iterator import _IterObject
-
+from memory import make_object
+from players.helpers import index_from_userid
+from players import PlayerGenerator
 from weapons.entity import Weapon
+
+# Warcraft: GO
+from wcgo.database import save_player_data
+from wcgo.configs import starting_heroes
+from wcgo.configs import player_entity_class
+from wcgo.database import load_player_data
+from wcgo.database import save_hero_data
+from wcgo.entities import Hero
+from wcgo.tools import find_element
 
 
 # ======================================================================

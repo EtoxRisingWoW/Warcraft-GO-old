@@ -2,16 +2,14 @@
 # >> IMPORTS
 # ======================================================================
 
-# Warcraft: GO
-from wcgo.entities import Hero
-
-from wcgo.tools import find_element
-
-from wcgo.configs import database_path
-
 # Python
-import sqlite3
+from sqlite3 import connect
 from contextlib import closing
+
+# Warcraft: GO
+from wcgo.configs import database_path
+from wcgo.entities import Hero
+from wcgo.tools import find_element
 
 
 # ======================================================================
@@ -29,7 +27,7 @@ def setup():
     """Creates the WC:GO tables into the database."""
 
     global connection
-    connection = sqlite3.connect(database_path)
+    connection = connect(database_path)
     with closing(connection.cursor()) as cursor:
         cursor.execute("""CREATE TABLE IF NOT EXISTS players (
             steamid TEXT PRIMARY KEY,

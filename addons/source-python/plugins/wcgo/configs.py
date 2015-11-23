@@ -3,10 +3,10 @@
 # ======================================================================
 
 # Python
-import os
+from os.path import dirname
 
 # Source.Python
-import players.entity
+from players.entity import Player
 
 
 # ======================================================================
@@ -20,7 +20,7 @@ admins = (
 
 
 # (Relative) path to database file used by Hero-Wars
-database_path = os.path.dirname(__file__) + '/players.db'
+database_path = dirname(__file__) + '/players.db'
 
 
 # Amounts of experience points gained from objectives
@@ -103,4 +103,4 @@ def exp_algorithm(level):
 
 
 # PlayerEntity class used as a super class of Hero-Wars's Player class
-player_entity_class = players.entity.Player
+player_entity_class = Player

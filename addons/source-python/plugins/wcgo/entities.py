@@ -2,20 +2,19 @@
 # >> IMPORTS
 # ======================================================================
 
-# Warcraft: GO
-from wcgo.tools import get_subclasses
-from wcgo.tools import classproperty
-
-from wcgo.configs import default_hero_category
-from wcgo.configs import default_item_category
-from wcgo.configs import item_sell_value_multiplier
-from wcgo.configs import exp_algorithm
+# Python 3.4
+import operator
 
 # Source.Python
 from messages import SayText2
 
-# Python 3.4
-import operator
+# Warcraft: GO
+from wcgo.configs import default_hero_category
+from wcgo.configs import default_item_category
+from wcgo.configs import item_sell_value_multiplier
+from wcgo.configs import exp_algorithm
+from wcgo.tools import get_subclasses
+from wcgo.tools import classproperty
 
 
 # ======================================================================
