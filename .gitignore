@@ -11,3 +11,4 @@ __pycache__
 // Visual Studio
 *.vs
 *.pyproj
+*.sln
