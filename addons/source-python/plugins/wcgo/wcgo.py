@@ -195,12 +195,12 @@ def client_command_showxp(command, index):
     )
     return CommandReturn.BLOCK
 
-@ClientCommand(['wcsmenu', 'wcs'])
+@ClientCommand(['wcgomenu', 'wcgo'])
 def client_command_menu(command, index):
     menus['Main'].send(index)
     return CommandReturn.BLOCK
 
-# wcs_ability 1, wcs_ability 2, etc
+# wcgo_ability 1, wcgo_ability 2, etc
 @ClientCommand('ability')
 def client_command_ability(command, index):
     ability_index = int(command.get_arg_string())
@@ -215,7 +215,7 @@ def client_command_ability(command, index):
         ability.execute_method('player_use', **eargs)
     return CommandReturn.BLOCK
 
-@ClientCommand('wcsadmin')
+@ClientCommand('wcgoadmin')
 def client_command_admin(command, index):
     player = Player(index)
     if player.steamid in cfg.admins:
@@ -246,12 +246,12 @@ def client_command_playerinfo(command, index):
     menus['Playerinfo Choose'].send(index)
     return CommandReturn.BLOCK
 
-@SayCommand(['wcs', '!wcs'])
+@SayCommand(['wcgo', '!wcgo'])
 def say_command_menu(command, index, team):
     menus['Main'].send(index)
     return CommandReturn.BLOCK
 
-@SayCommand(['wcsadmin', '!wcsadmin'])
+@SayCommand(['wcgoadmin', '!wcgoadmin'])
 def say_command_admin(command, index, team):
     player = Player(index)
     if player.steamid in cfg.admins:
