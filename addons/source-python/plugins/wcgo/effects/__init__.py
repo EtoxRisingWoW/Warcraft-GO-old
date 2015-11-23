@@ -1,9 +1,9 @@
-# ======================================================================
+﻿# ======================================================================
 # >> IMPORTS
 # ======================================================================
 
-from hw.effects.precache import models
-from hw.effects.levelup import level_up
+from wcgo.effects.precache import models
+from wcgo.effects.levelup import level_up
 
 # ======================================================================
 # >> ALL DECLERATION

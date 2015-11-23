@@ -1,8 +1,8 @@
-# ======================================================================
+﻿# ======================================================================
 # >> IMPORTS
 # ======================================================================
 
-from wcs.effects import models
+from wcgo.effects import models
 
 from entities.entity import Entity
 from entities.helpers import index_from_pointer

@@ -1,9 +1,9 @@
-# ======================================================================
+﻿# ======================================================================
 # >> IMPORTS
 # ======================================================================
 
-# Hero-Wars
-from hw.configs import message_prefix
+# Warcraft: GO
+from wcgo.configs import message_prefix
 
 # Python
 from random import randint
@@ -50,6 +50,7 @@ def message(player_index, message):
             prefix=message_prefix,
             msg=message
         )).send(player_index)
+
 
 def find_element(iterable, attr_name, attr_value):
     """Finds an element from an iterable by comparing an attribute.

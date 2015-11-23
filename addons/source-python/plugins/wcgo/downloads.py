@@ -1,14 +1,16 @@
-##
-## IMPORTS
-##
+﻿# ======================================================================
+# >> IMPORTS
+# ======================================================================
 
+# Source.Python
 from core import AutoUnload
 from events.manager import event_manager
 from stringtables import string_tables
 
-##
-## LISTS
-##
+
+# ======================================================================
+# >> CLASSES
+# ======================================================================
 
 class _SoundsList(list):
     def __init__(self):

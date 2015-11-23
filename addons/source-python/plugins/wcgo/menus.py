@@ -1,22 +1,22 @@
-# ======================================================================
+﻿# ======================================================================
 # >> IMPORTS
 # ======================================================================
 
-# Hero-Wars
-from hw.tools import find_element
-from hw.tools import find_elements
-from hw.tools import message
-from hw.tools import shiftattr
-from hw.tools import split_string
+# Warcraft: GO
+from wcgo.tools import find_element
+from wcgo.tools import find_elements
+from wcgo.tools import message
+from wcgo.tools import shiftattr
+from wcgo.tools import split_string
 
-import hw.configs as cfg
-from hw.configs import admins
+import wcgo.configs as cfg
+from wcgo.configs import admins
 
-from hw.entities import Hero
-from hw.entities import Item
+from wcgo.entities import Hero
+from wcgo.entities import Item
 
-from hw.player import Player
-from hw.player import PlayerIter
+from wcgo.player import Player
+from wcgo.player import PlayerIter
 
 # Source.Python
 from engines.server import engine_server
@@ -36,7 +36,7 @@ from translations.strings import LangStrings
 # >> GLOBALS
 # ======================================================================
 
-_TR = LangStrings('hw/menus')
+_TR = LangStrings('wcgo/menus')
 
 _description_width = 50
 

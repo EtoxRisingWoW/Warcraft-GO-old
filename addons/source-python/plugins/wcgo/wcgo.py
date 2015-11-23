@@ -1,24 +1,24 @@
-# ======================================================================
+﻿# ======================================================================
 # >> IMPORTS
 # ======================================================================
 
-# Hero-Wars
-from hw.player import Player
-from hw.player import PlayerIter
+# Warcraft: GO
+from wcgo.player import Player
+from wcgo.player import PlayerIter
 
-import hw.database
-from hw.effects import level_up
-from hw.entities import Hero
+import wcgo.database
+from wcgo.effects import level_up
+from wcgo.entities import Hero
 
-from hw.tools import get_messages
-from hw.tools import find_element
+from wcgo.tools import get_messages
+from wcgo.tools import find_element
 
-from hw.menus import menus
+from wcgo.menus import menus
 
-from hw.heroes import *
-from hw.items import *
+from wcgo.heroes import *
+from wcgo.items import *
 
-import hw.configs as cfg
+import wcgo.configs as cfg
 
 # Source.Python
 from events import Event
@@ -44,10 +44,10 @@ from messages import HintText, SayText2
 
 # Plugin info
 info = PluginInfo()
-info.name = 'Hero-Wars'
+info.name = 'Warcraft: GO'
 info.author = 'Mahi'
 info.version = '0.6.1'
-info.basename = 'hw'
+info.basename = 'wcgo'
 info.variable = "{0}_version".format(info.basename)
 
 # Public variable for plugin info
@@ -62,9 +62,9 @@ info.convar = PublicConVar(
 exp_values = cfg._retrieve_exp_values(cfg.exp_multiplier)
 
 # Translation messages
-exp_messages = get_messages(LangStrings('hw/exp'), HintText)
-gold_messages = get_messages(LangStrings('hw/gold'), SayText2)
-other_messages = get_messages(LangStrings('hw/other'), SayText2)
+exp_messages = get_messages(LangStrings('wcgo/exp'), HintText)
+gold_messages = get_messages(LangStrings('wcgo/gold'), SayText2)
+other_messages = get_messages(LangStrings('wcgo/other'), SayText2)
 
 
 # ======================================================================
@@ -72,7 +72,7 @@ other_messages = get_messages(LangStrings('hw/other'), SayText2)
 # ======================================================================
 
 def load():
-    """Setups the database upon Hero-Wars loading.
+    """Setups the database upon sp load.
 
     Makes sure there are heroes on the server, restarts the game
     and setups the database file.
@@ -91,7 +91,7 @@ def load():
             raise ValueError('Invalid starting hero cid: {0}'.format(cid))
 
     # Setup database
-    hw.database.setup()
+    wcgo.database.setup()
 
     # Restart the game
     engine_server.server_command('mp_restartgame 1\n')
@@ -105,11 +105,11 @@ def unload():
 
     # Save each player's data into the database
     for player in PlayerIter():
-        hw.database.save_player_data(player)
+        wcgo.database.save_player_data(player)
 
     # Commit and close
-    hw.database.connection.commit()
-    hw.database.connection.close()
+    wcgo.database.connection.commit()
+    wcgo.database.connection.close()
 
     # Send a message to everyone
     other_messages['Plugin Unloaded'].send()

@@ -1,18 +1,17 @@
-# ======================================================================
+﻿# ======================================================================
 # >> IMPORTS
 # ======================================================================
 
-# Hero-Wars
-from hw.database import save_player_data
-from hw.database import load_player_data
-from hw.database import save_hero_data
+# Warcraft: GO from wcgo.database import save_player_data
+from wcgo.database import load_player_data
+from wcgo.database import save_hero_data
 
-from hw.entities import Hero
+from wcgo.entities import Hero
 
-from hw.tools import find_element
+from wcgo.tools import find_element
 
-from hw.configs import starting_heroes
-from hw.configs import player_entity_class
+from wcgo.configs import starting_heroes
+from wcgo.configs import player_entity_class
 
 # Source.Python
 from players.helpers import index_from_userid

@@ -1,15 +1,15 @@
-# ======================================================================
+﻿# ======================================================================
 # >> IMPORTS
 # ======================================================================
 
-# Hero-Wars
-from hw.tools import get_subclasses
-from hw.tools import classproperty
+# Warcraft: GO
+from wcgo.tools import get_subclasses
+from wcgo.tools import classproperty
 
-from hw.configs import default_hero_category
-from hw.configs import default_item_category
-from hw.configs import item_sell_value_multiplier
-from hw.configs import exp_algorithm
+from wcgo.configs import default_hero_category
+from wcgo.configs import default_item_category
+from wcgo.configs import item_sell_value_multiplier
+from wcgo.configs import exp_algorithm
 
 # Source.Python
 from messages import SayText2
@@ -150,8 +150,8 @@ class Entity(object):
 class Hero(Entity):
     """Heroes strenghten players, giving them a set of powerful skills.
 
-    Each hero has its own unique skill set (see hw.core.Skill) to
-    spice up the game.
+    Each hero has its own unique skill set (see wcsgo.entities.Skill)
+    to spice up the game.
     Clients attempt to level up their heroes by gaining enough
     experience points (exp) until the hero levels up.
     Experience points are gained from in-game tasks, such as killing
@@ -173,7 +173,7 @@ class Hero(Entity):
     category = default_hero_category
 
     def __init__(self, level=0, exp=0):
-        """Initializes a new Hero-Wars hero.
+        """Initializes a new hero.
 
         Args:
             level: Hero's current level

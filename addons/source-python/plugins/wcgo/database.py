@@ -1,13 +1,13 @@
-# ======================================================================
+﻿# ======================================================================
 # >> IMPORTS
 # ======================================================================
 
-# Hero-Wars
-from hw.entities import Hero
+# Warcraft: GO
+from wcgo.entities import Hero
 
-from hw.tools import find_element
+from wcgo.tools import find_element
 
-from hw.configs import database_path
+from wcgo.configs import database_path
 
 # Python
 import sqlite3
@@ -26,7 +26,7 @@ connection = None
 # ======================================================================
 
 def setup():
-    """Creates the Hero-Wwars tables into the database."""
+    """Creates the WC:GO tables into the database."""
 
     global connection
     connection = sqlite3.connect(database_path)
