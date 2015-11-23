@@ -7,12 +7,8 @@ from hw.player import Player
 from hw.player import PlayerIter
 
 import hw.database
-
+from hw.effects import level_up
 from hw.entities import Hero
-
-from hw.events import Hero_Level_Up
-from hw.events import Player_Ultimate
-from hw.events import load as load_events
 
 from hw.tools import get_messages
 from hw.tools import find_element
@@ -28,7 +24,6 @@ import hw.configs as cfg
 from events import Event
 
 from players.helpers import userid_from_playerinfo
-from players.helpers import index_from_playerinfo
 
 from engines.server import engine_server
 
@@ -39,6 +34,8 @@ from plugins.info import PluginInfo
 from translations.strings import LangStrings
 
 from commands.client import ClientCommand
+
+from messages import HintText, SayText2
 
 
 # ======================================================================
@@ -61,10 +58,13 @@ info.convar = PublicConVar(
     "{0} Version".format(info.name)
 )
 
+# Experience Values
+exp_values = cfg._retrieve_exp_values(cfg.exp_multiplier)
+
 # Translation messages
-exp_messages = get_messages(LangStrings('hw/exp'))
-gold_messages = get_messages(LangStrings('hw/gold'))
-other_messages = get_messages(LangStrings('hw/other'))
+exp_messages = get_messages(LangStrings('hw/exp'), HintText)
+gold_messages = get_messages(LangStrings('hw/gold'), SayText2)
+other_messages = get_messages(LangStrings('hw/other'), SayText2)
 
 
 # ======================================================================
@@ -92,9 +92,6 @@ def load():
 
     # Setup database
     hw.database.setup()
-
-    # Load Hero-Wars events
-    load_events()
 
     # Restart the game
     engine_server.server_command('mp_restartgame 1\n')
@@ -144,8 +141,11 @@ def give_exp(player, exp_key):
 
     exp = cfg.exp_values.get(exp_key, 0)
     if exp > 0:
+        level = player.hero.level
         player.hero.exp += exp
         exp_messages[exp_key].send(player.index, exp=exp)
+        if player.hero.level > level:
+            hero_level_up(player)
 
 
 def give_team_exp(player, exp_key):
@@ -166,26 +166,144 @@ def give_team_exp(player, exp_key):
 # >> CLIENT COMMANDS
 # ======================================================================
 
-@ClientCommand('hw_ultimate')
-def client_command_ultimate(playerinfo, command):
-    """Raises ultimate event with player's information."""
+@ClientCommand(['buymenu'])
+def client_command_buymenu(command, index):
+    menus['Item Buy Categories'].send(index)
+    return CommandReturn.BLOCK
 
-    Player_Ultimate(
-        index=index_from_playerinfo(playerinfo),
-        userid=userid_from_playerinfo(playerinfo)
-    ).fire()
+@ClientCommand(['sellmenu', 'sell'])
+def client_command_sellmenu(command, index):
+    menus['Sell Items'].send(index)
+    return CommandReturn.BLOCK
 
+@ClientCommand('ultimate')
+def client_command_ultimate(command, index):
+    player = Player(index)
+    player.hero.execute_skills('player_ultimate', player=player)
+    return CommandReturn.BLOCK
 
-@ClientCommand('hw_menu')
-def client_command_menu(playerinfo, command):
-    """Opens a menu."""
+@ClientCommand('showxp')
+def client_command_showxp(command, index):
+    player = Player(index)
 
-    index = index_from_playerinfo(playerinfo)
-    menu = command.get_arg_string()
-    if menu in menus:
-        menus[menu].send(index)
+    other_messages['Hero Status'].send(
+        player.index,
+        name=player.hero.name,
+        level=player.hero.level,
+        current=player.hero.exp,
+        required=player.hero.required_exp
+    )
+    return CommandReturn.BLOCK
+
+@ClientCommand(['wcsmenu', 'wcs'])
+def client_command_menu(command, index):
+    menus['Main'].send(index)
+    return CommandReturn.BLOCK
+
+# wcs_ability 1, wcs_ability 2, etc
+@ClientCommand('ability')
+def client_command_ability(command, index):
+    ability_index = int(command.get_arg_string())
+    player = Player(index)
+    if len(player.hero.abilities) >= ability_index:
+        ability = player.hero.abilities[ability_index-1]
+
+        eargs = {
+            'player': player
+        }
+
+        ability.execute_method('player_use', **eargs)
+    return CommandReturn.BLOCK
+
+@ClientCommand('wcsadmin')
+def client_command_admin(command, index):
+    player = Player(index)
+    if player.steamid in cfg.admins:
+        menus['Admin'].send(index)
     else:
-        menus['Main'].send(index)
+        other_messages['Not Admin'].send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('raceinfo')
+def client_command_ability(command, index):
+    player = Player(index)
+    menu = _make_heroinfo(player.hero)
+    menu.send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('changerace')
+def client_command_changerace(command, index):
+    menus['Owned Heroes'].send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('buyrace')
+def client_command_buyrace(command, index):
+    menus['Hero Buy Categories'].send(index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('playerinfo')
+def client_command_playerinfo(command, index):
+    menus['Playerinfo Choose'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['wcs', '!wcs'])
+def say_command_menu(command, index, team):
+    menus['Main'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['wcsadmin', '!wcsadmin'])
+def say_command_admin(command, index, team):
+    player = Player(index)
+    if player.steamid in cfg.admins:
+        menus['Admin'].send(index)
+    else:
+        other_messages['Not Admin'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['raceinfo', '!raceinfo'])
+def say_command_raceinfo(command, index, team):
+    player = Player(index)
+    menu = _make_heroinfo(player.hero)
+    menu.send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['changerace', '!changerace'])
+def say_command_changerace(command, index, team):
+    menus['Owned Heroes'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['buyraces', '!buyraces'])
+def say_command_buyrace(command, index, team):
+    menus['Hero Buy Categories'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['playerinfo', '!playerinfo'])
+def say_command_playerinfo(command, index, team):
+    menus['Playerinfo Choose'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['showxp', '!showxp'])
+def say_command_showxp(command, index, team):
+    player = Player(index)
+
+    other_messages['Hero Status'].send(
+        player.index,
+        name=player.hero.name,
+        level=player.hero.level,
+        current=player.hero.exp,
+        required=player.hero.required_exp
+    )
+    return CommandReturn.BLOCK
+
+@SayCommand(['buymenu', 'buy', '!buymenu', '!buy'])
+def say_command_buymenu(command, index, team):
+    menus['Item Buy Categories'].send(index)
+    return CommandReturn.BLOCK
+
+@SayCommand(['sellmenu', 'sell', '!sellmenu', '!sell'])
+def say_command_sellmenu(command, index, team):
+    menus['Sell Items'].send(index)
+    return CommandReturn.BLOCK
 
 
 # ======================================================================
@@ -303,27 +421,6 @@ def on_player_say(game_event):
     player = Player.from_userid(game_event.get_int('userid'))
     text = game_event.get_string('text')
 
-    # If text doesn't begin with the prefix, it's useless for us
-    if text[:len(cfg.chat_command_prefix)] != cfg.chat_command_prefix:
-        return
-
-    # Get the ACTUAL text without the prefix
-    text2 = text[len(cfg.chat_command_prefix):]
-
-    # If the text was '!ultimate', execute ultimate skills
-    if text2 == 'ultimate':
-        Player_Ultimate(
-            index=player.index,
-            userid=player.userid
-        ).fire()
-
-    # If the text was '!hw' or '!hw', open Main menu
-    elif text2 in ('hw', 'hw'):
-        menus['Main'].send(player.index)
-
-    elif text2 == 'admin' and player.steamid in cfg.admins:
-        menus['Admin'].send(player.index)
-
     # Finally, execute hero's player_say skills
     player.hero.execute_skills('player_say', player=player, text=text)
 
@@ -358,6 +455,9 @@ def on_round_end(game_event):
 @Event('round_start')
 def on_round_start(game_event):
     """Executes round_start skills."""
+
+    global exp_values
+    exp_values = cfg._retrieve_exp_values(cfg.exp_multiplier)
 
     for player in PlayerIter():
         player.hero.execute_skills(
@@ -429,36 +529,11 @@ def on_hostage_rescued(game_event):
     player.hero.execute_skills('hostage_rescued', player=player)
 
 
-@Event('hero_pre_level_up')
-def on_hero_pre_level_up(game_event):
-    """Fetches the player and raises the Hero_Level_Up event."""
-
-    # Raise hero_level_up event
-    hero_id = int(game_event.get_string('id'))
-    owner = None
-    for player in PlayerIter():
-        if id(player.hero) == hero_id:
-            owner = player
-            break
-    if owner:
-        Hero_Level_Up(
-            cid=game_event.get_string('cid'),
-            id=str(hero_id),
-            player_index=player.index,
-            player_userid=player.userid
-        ).fire()
-
-
-@Event('hero_level_up')
-def on_hero_level_up(game_event):
+def hero_level_up(player):
     """Sends hero's status to player and opens current hero menu.
 
     Also executes hero_level_up skills.
     """
-
-    # Get the player and his hero
-    index = game_event.get_int('player_index')
-    player = Player(index)
     hero = player.hero
 
     # Send hero's status via chat
@@ -477,10 +552,4 @@ def on_hero_level_up(game_event):
     # Execute player's skills
     player.hero.execute_skills('hero_level_up', player=player, hero=hero)
 
-
-@Event('player_ultimate')
-def on_player_ultimate(game_event):
-    """Executes ultimate skills."""
-
-    player = Player.from_userid(game_event.get_int('userid'))
-    player.hero.execute_skills('player_ultimate', player=player)
+    level_up(player)
