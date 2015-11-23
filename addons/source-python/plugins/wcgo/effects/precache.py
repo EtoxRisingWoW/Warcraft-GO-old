@@ -2,7 +2,10 @@
 # >> IMPORTS
 # ======================================================================
 
-from collections import defaultdict
+# Source.Python
 from engines.precache import Model
 
-models = defaultdict(Model)
+# Warcraft: GO
+from wcgo.tools import keydefaultdict
+
+models = keydefaultdict(Model)

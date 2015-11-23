@@ -2,7 +2,7 @@
 # >> IMPORTS
 # ======================================================================
 
-from wcgo.effects import models
+from wcgo.effects.precache import models
 
 from entities.entity import Entity
 from entities.helpers import index_from_pointer

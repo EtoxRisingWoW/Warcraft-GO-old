@@ -25,7 +25,7 @@ class _Sounds(dict):
 # >> GLOBALS
 # ======================================================================
 
-sound_list = ['sound/source-python/wcs/levelup.mp3']
+sound_list = ['sound/source-python/wcgo/levelup.mp3']
 sounds = _Sounds()
 for sound in sound_list:
 	instance = sounds[sound]

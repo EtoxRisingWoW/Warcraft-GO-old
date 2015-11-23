@@ -3,6 +3,7 @@
 # ======================================================================
 
 # Python
+from collections import defaultdict
 from functools import wraps, WRAPPER_ASSIGNMENTS
 from random import randint
 
@@ -30,6 +31,13 @@ class classproperty(object):
     def __get__(self, instance, owner):
         return self.getter(owner)
 
+class keydefaultdict(defaultdict):
+    def __missing__(self, key):
+        if self.default_factory is None:
+            raise KeyError( key )
+        else:
+            ret = self[key] = self.default_factory(key)
+            return ret
 
 # ======================================================================
 # >> FUNCTIONS
