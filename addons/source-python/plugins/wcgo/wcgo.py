@@ -3,6 +3,8 @@
 # ======================================================================
 
 # Warcraft: GO
+from wcgo.adverts import send_advert
+
 from wcgo.player import Player
 from wcgo.player import PlayerIter
 
@@ -458,6 +460,8 @@ def on_round_start(game_event):
 
     global exp_values
     exp_values = cfg._retrieve_exp_values(cfg.exp_multiplier)
+
+    send_advert()
 
     for player in PlayerIter():
         player.hero.execute_skills(
